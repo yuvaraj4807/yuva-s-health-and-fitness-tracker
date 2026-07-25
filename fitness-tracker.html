@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Logbook — Daily Training Journal</title>
+<style>
+  :root{
+    --pine:#132420;
+    --pine-deep:#0C1B17;
+    --paper:#EFE9DC;
+    --paper-dim:#E2DCCC;
+    --ink:#1F2A24;
+    --ink-soft:#4A554E;
+    --coral:#E85B41;
+    --sage:#8FAE93;
+    --amber:#D9A441;
+    --rule:rgba(31,42,36,0.14);
+    --rule-dark:rgba(239,233,220,0.14);
+    --font-display:'Rockwell', 'Roboto Slab', Georgia, serif;
+    --font-body:'Inter','Helvetica Neue',Arial,sans-serif;
+    --font-mono:'IBM Plex Mono','Courier New',monospace;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--pine);
+    color:var(--paper);
+    font-family:var(--font-body);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
+  }
+
+  .wrap{max-width:1040px;margin:0 auto;padding:28px 20px 80px;}
+
+  /* ===== Header ===== */
+  header{
+    display:flex;justify-content:space-between;align-items:flex-end;
+    padding-bottom:18px;border-bottom:1px solid var(--rule-dark);
+    margin-bottom:26px;flex-wrap:wrap;gap:14px;
+  }
+  .brand{display:flex;flex-direction:column;gap:2px;}
+  .brand .eyebrow{
+    font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--sage);
+  }
+  .brand h1{
+    font-family:var(--font-display);font-weight:700;font-size:34px;margin:0;
+    letter-spacing:.01em;color:var(--paper);
+  }
+  .date-stamp{
+    font-family:var(--font-mono);font-size:13px;color:var(--paper);opacity:.75;
+    text-align:right;
+  }
+  .streak{
+    display:flex;align-items:center;gap:8px;margin-top:6px;justify-content:flex-end;
+    font-family:var(--font-mono);
+  }
+  .streak .flame{color:var(--coral);font-size:16px;}
+  .streak b{font-size:15px;color:var(--amber);}
+
+  /* ===== Hero grid ===== */
+  .hero{
+    display:grid;grid-template-columns:1.15fr 1fr 1fr;gap:16px;margin-bottom:22px;
+  }
+  @media (max-width:760px){ .hero{grid-template-columns:1fr;} }
+
+  .card{
+    background:var(--paper);color:var(--ink);border-radius:4px;
+    padding:20px;position:relative;overflow:hidden;
+  }
+  .card .tag{
+    font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--ink-soft);margin-bottom:10px;display:block;
+  }
+
+  /* Activity ring card */
+  .ring-card{display:flex;align-items:center;gap:18px;}
+  .ring-wrap{position:relative;width:132px;height:132px;flex:0 0 auto;}
+  .ring-wrap svg{transform:rotate(-90deg);}
+  .ring-label{
+    position:absolute;inset:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+  }
+  .ring-label .num{font-family:var(--font-mono);font-weight:700;font-size:22px;line-height:1;}
+  .ring-label .sub{font-family:var(--font-mono);font-size:10px;color:var(--ink-soft);margin-top:3px;}
+  .ring-meta{flex:1;}
+  .ring-meta h3{margin:0 0 6px;font-family:var(--font-display);font-size:19px;}
+  .ring-meta p{margin:0;font-size:13px;color:var(--ink-soft);line-height:1.45;}
+  .step-input{
+    margin-top:10px;display:flex;gap:6px;
+  }
+  .step-input button{
+    width:30px;height:30px;border-radius:3px;border:1px solid var(--ink);
+    background:transparent;color:var(--ink);font-family:var(--font-mono);
+    font-size:16px;cursor:pointer;line-height:1;
+  }
+  .step-input button:hover{background:var(--ink);color:var(--paper);}
+  .step-input button:focus-visible, button:focus-visible, input:focus-visible{
+    outline:2px solid var(--coral);outline-offset:2px;
+  }
+
+  /* Water card */
+  .water-card h3{margin:0 0 4px;font-family:var(--font-display);font-size:19px;}
+  .water-card .amt{font-family:var(--font-mono);font-size:12px;color:var(--ink-soft);margin-bottom:12px;}
+  .glasses{display:flex;flex-wrap:wrap;gap:8px;}
+  .glass{
+    width:30px;height:38px;border:1.5px solid var(--ink);border-radius:0 0 6px 6px;
+    cursor:pointer;position:relative;background:transparent;padding:0;
+  }
+  .glass .fill{
+    position:absolute;left:0;right:0;bottom:0;background:var(--sage);
+    border-radius:0 0 5px 5px;transition:height .25s ease;
+  }
+  .glass.filled .fill{height:100%;}
+
+  /* Streak/calories card */
+  .stat-stack{display:flex;flex-direction:column;gap:14px;}
+  .stat-row{display:flex;justify-content:space-between;align-items:baseline;
+    border-bottom:1px dashed var(--rule);padding-bottom:10px;}
+  .stat-row:last-child{border-bottom:none;padding-bottom:0;}
+  .stat-row .label{font-size:13px;color:var(--ink-soft);}
+  .stat-row .value{font-family:var(--font-mono);font-weight:700;font-size:20px;}
+  .stat-row .value.coral{color:var(--coral);}
+  .stat-row .value.amber-c{color:var(--amber);}
+
+  /* ===== Section shell ===== */
+  .section{
+    background:var(--paper);color:var(--ink);border-radius:4px;
+    padding:24px;margin-bottom:16px;
+  }
+  .section-head{
+    display:flex;justify-content:space-between;align-items:baseline;
+    margin-bottom:16px;
+  }
+  .section-head h2{
+    font-family:var(--font-display);font-size:21px;margin:0;
+  }
+  .section-head .count{font-family:var(--font-mono);font-size:12px;color:var(--ink-soft);}
+
+  /* ===== Weight chart ===== */
+  .chart-row{display:flex;gap:24px;flex-wrap:wrap;}
+  .chart-box{flex:1;min-width:280px;}
+  svg.trend{width:100%;height:180px;display:block;}
+  .trend .grid-line{stroke:var(--rule);stroke-width:1;}
+  .trend .trend-line{fill:none;stroke:var(--coral);stroke-width:2.5;}
+  .trend .trend-dot{fill:var(--coral);}
+  .trend .axis-label{font-family:var(--font-mono);font-size:9px;fill:var(--ink-soft);}
+  .weight-form{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;}
+  .weight-form input{
+    font-family:var(--font-mono);font-size:14px;padding:8px 10px;border:1px solid var(--ink);
+    border-radius:3px;background:transparent;color:var(--ink);width:110px;
+  }
+  .btn{
+    font-family:var(--font-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+    padding:9px 16px;border-radius:3px;border:1px solid var(--ink);background:var(--ink);
+    color:var(--paper);cursor:pointer;
+  }
+  .btn:hover{background:transparent;color:var(--ink);}
+  .btn.ghost{background:transparent;color:var(--ink);}
+  .btn.ghost:hover{background:var(--ink);color:var(--paper);}
+
+  /* ===== Workout log ===== */
+  .log-form{
+    display:grid;grid-template-columns:1.4fr 1fr 1fr auto;gap:10px;margin-bottom:18px;
+  }
+  @media (max-width:640px){ .log-form{grid-template-columns:1fr 1fr;} }
+  .log-form input, .log-form select{
+    font-family:var(--font-body);font-size:13px;padding:9px 10px;border:1px solid var(--ink);
+    border-radius:3px;background:transparent;color:var(--ink);
+  }
+
+  .entries{display:flex;flex-direction:column;}
+  .entry{
+    display:grid;grid-template-columns:80px 1fr auto auto auto;gap:14px;align-items:center;
+    padding:12px 0;border-bottom:1px solid var(--rule);
+  }
+  @media (max-width:640px){ .entry{grid-template-columns:60px 1fr auto auto;} .entry .entry-cal{display:none;} }
+  .entry:last-child{border-bottom:none;}
+  .entry .entry-time{font-family:var(--font-mono);font-size:11px;color:var(--ink-soft);}
+  .entry .entry-name{font-size:14px;font-weight:600;}
+  .entry .entry-dur{font-family:var(--font-mono);font-size:12px;color:var(--ink-soft);}
+  .entry .entry-cal{font-family:var(--font-mono);font-size:12px;color:var(--coral);}
+  .entry .del{
+    background:none;border:none;color:var(--ink-soft);cursor:pointer;font-size:16px;
+    line-height:1;padding:2px 6px;
+  }
+  .entry .del:hover{color:var(--coral);}
+  .empty{
+    padding:24px 0;text-align:center;color:var(--ink-soft);font-size:13px;
+    font-family:var(--font-mono);
+  }
+
+  footer{
+    text-align:center;color:var(--paper);opacity:.5;font-family:var(--font-mono);
+    font-size:11px;margin-top:24px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <span class="eyebrow">Field Notes / Vitals</span>
+      <h1>Logbook</h1>
+    </div>
+    <div>
+      <div class="date-stamp" id="todayStamp"></div>
+      <div class="streak"><span class="flame">●</span> <span>Streak</span> <b id="streakVal">0 days</b></div>
+    </div>
+  </header>
+
+  <div class="hero">
+    <div class="card ring-card">
+      <div class="ring-wrap">
+        <svg width="132" height="132" viewBox="0 0 132 132">
+          <circle class="grid-line" cx="66" cy="66" r="56" fill="none" stroke="var(--paper-dim)" stroke-width="12"/>
+          <circle id="ringProgress" cx="66" cy="66" r="56" fill="none" stroke="var(--coral)" stroke-width="12"
+            stroke-linecap="round" stroke-dasharray="352" stroke-dashoffset="352"/>
+        </svg>
+        <div class="ring-label">
+          <div class="num" id="stepsNum">0</div>
+          <div class="sub" id="stepsGoalLabel">of 8,000</div>
+        </div>
+      </div>
+      <div class="ring-meta">
+        <span class="tag">Steps Today</span>
+        <h3>Keep the ring closing</h3>
+        <p>Log steps as you go. Goal resets each day.</p>
+        <div class="step-input">
+          <button id="stepMinus" aria-label="Remove 500 steps">−</button>
+          <button id="stepPlus" aria-label="Add 500 steps">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card water-card">
+      <span class="tag">Hydration</span>
+      <h3>Water Intake</h3>
+      <div class="amt"><span id="waterCount">0</span> / <span id="waterGoal">8</span> glasses · <span id="waterOz">0</span> oz</div>
+      <div class="glasses" id="glassRow"></div>
+    </div>
+
+    <div class="card">
+      <span class="tag">Today</span>
+      <div class="stat-stack">
+        <div class="stat-row"><span class="label">Workouts logged</span><span class="value" id="workoutCountToday">0</span></div>
+        <div class="stat-row"><span class="label">Calories burned</span><span class="value coral" id="calBurnedToday">0</span></div>
+        <div class="stat-row"><span class="label">Active minutes</span><span class="value amber-c" id="activeMinToday">0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <h2>Weight Trend</h2>
+      <span class="count" id="weightCount">0 entries</span>
+    </div>
+    <div class="chart-row">
+      <div class="chart-box">
+        <svg class="trend" viewBox="0 0 560 180" preserveAspectRatio="none" id="trendSvg"></svg>
+      </div>
+    </div>
+    <form class="weight-form" id="weightForm">
+      <input type="number" step="0.1" id="weightInput" placeholder="Weight (lb)" required>
+      <button type="submit" class="btn">Log Weight</button>
+    </form>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <h2>Workout Log</h2>
+      <span class="count" id="logCount">0 entries today</span>
+    </div>
+    <form class="log-form" id="workoutForm">
+      <input type="text" id="woName" placeholder="Activity (e.g. Run, Lift, Yoga)" required>
+      <select id="woDuration" required>
+        <option value="">Duration</option>
+        <option value="15">15 min</option>
+        <option value="30">30 min</option>
+        <option value="45">45 min</option>
+        <option value="60">60 min</option>
+        <option value="90">90 min</option>
+      </select>
+      <input type="number" id="woCalories" placeholder="Calories (opt.)">
+      <button type="submit" class="btn">Add Entry</button>
+    </form>
+    <div class="entries" id="entryList"></div>
+  </div>
+
+  <footer>Logbook · data lives only in this session — nothing is saved after you close the tab.</footer>
+</div>
+
+<script>
+(function(){
+  // ---------- state ----------
+  const state = {
+    steps: 0,
+    stepGoal: 8000,
+    water: 0,
+    waterGoal: 8,
+    ounceEach: 8,
+    weights: [], // {date, value}
+    workouts: [], // {id, name, duration, calories, time}
+    streak: 4
+  };
+
+  const todayStr = new Date().toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric'});
+  document.getElementById('todayStamp').textContent = todayStr;
+  document.getElementById('streakVal').textContent = state.streak + ' days';
+
+  // ---------- steps ring ----------
+  const RING_CIRC = 2 * Math.PI * 56;
+  function renderSteps(){
+    document.getElementById('stepsNum').textContent = state.steps.toLocaleString();
+    document.getElementById('stepsGoalLabel').textContent = 'of ' + state.stepGoal.toLocaleString();
+    const pct = Math.min(state.steps / state.stepGoal, 1);
+    const offset = RING_CIRC - pct * RING_CIRC;
+    document.getElementById('ringProgress').style.strokeDasharray = RING_CIRC;
+    document.getElementById('ringProgress').style.strokeDashoffset = offset;
+  }
+  document.getElementById('stepPlus').addEventListener('click', ()=>{ state.steps += 500; renderSteps(); });
+  document.getElementById('stepMinus').addEventListener('click', ()=>{ state.steps = Math.max(0, state.steps-500); renderSteps(); });
+  renderSteps();
+
+  // ---------- water ----------
+  function renderWater(){
+    document.getElementById('waterGoal').textContent = state.waterGoal;
+    document.getElementById('waterCount').textContent = state.water;
+    document.getElementById('waterOz').textContent = state.water * state.ounceEach;
+    const row = document.getElementById('glassRow');
+    row.innerHTML = '';
+    for(let i=0;i<state.waterGoal;i++){
+      const g = document.createElement('button');
+      g.className = 'glass' + (i < state.water ? ' filled' : '');
+      g.setAttribute('aria-label', 'Glass ' + (i+1) + (i < state.water ? ' — filled' : ' — empty'));
+      g.innerHTML = '<span class="fill"></span>';
+      g.addEventListener('click', ()=>{
+        state.water = (i < state.water && i === state.water - 1) ? state.water - 1 : i + 1;
+        renderWater();
+      });
+      row.appendChild(g);
+    }
+  }
+  renderWater();
+
+  // ---------- weight trend ----------
+  function renderTrend(){
+    document.getElementById('weightCount').textContent = state.weights.length + ' entries';
+    const svg = document.getElementById('trendSvg');
+    svg.innerHTML = '';
+    const w = 560, h = 180, pad = 30;
+    // gridlines
+    for(let i=0;i<=3;i++){
+      const y = pad + i * (h - pad*2)/3;
+      const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+      line.setAttribute('x1', pad); line.setAttribute('x2', w-10);
+      line.setAttribute('y1', y); line.setAttribute('y2', y);
+      line.setAttribute('class','grid-line');
+      svg.appendChild(line);
+    }
+    if(state.weights.length === 0){
+      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('x', w/2); t.setAttribute('y', h/2);
+      t.setAttribute('text-anchor','middle');
+      t.setAttribute('class','axis-label');
+      t.setAttribute('font-size','12');
+      t.textContent = 'Log a weigh-in to start the trend line';
+      svg.appendChild(t);
+      return;
+    }
+    const vals = state.weights.map(d=>d.value);
+    const max = Math.max(...vals), min = Math.min(...vals);
+    const range = (max - min) || 1;
+    const stepX = (w - pad - 20) / Math.max(state.weights.length - 1, 1);
+    const points = state.weights.map((d, i)=>{
+      const x = pad + i * stepX;
+      const y = h - pad - ((d.value - min) / range) * (h - pad*2);
+      return [x,y];
+    });
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('class','trend-line');
+    path.setAttribute('d', points.map((p,i)=> (i===0?'M':'L') + p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' '));
+    svg.appendChild(path);
+    points.forEach((p,i)=>{
+      const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      c.setAttribute('cx', p[0]); c.setAttribute('cy', p[1]); c.setAttribute('r', 3.5);
+      c.setAttribute('class','trend-dot');
+      svg.appendChild(c);
+      const label = document.createElementNS('http://www.w3.org/2000/svg','text');
+      label.setAttribute('x', p[0]); label.setAttribute('y', p[1]-10);
+      label.setAttribute('text-anchor','middle'); label.setAttribute('class','axis-label');
+      label.textContent = state.weights[i].value;
+      svg.appendChild(label);
+    });
+  }
+  renderTrend();
+
+  document.getElementById('weightForm').addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const input = document.getElementById('weightInput');
+    const val = parseFloat(input.value);
+    if(!isNaN(val) && val > 0){
+      state.weights.push({date: new Date(), value: val});
+      input.value = '';
+      renderTrend();
+    }
+  });
+
+  // ---------- workouts ----------
+  function renderWorkouts(){
+    const list = document.getElementById('entryList');
+    list.innerHTML = '';
+    document.getElementById('logCount').textContent = state.workouts.length + ' entries today';
+    document.getElementById('workoutCountToday').textContent = state.workouts.length;
+    const totalCal = state.workouts.reduce((s,w)=> s + (w.calories||0), 0);
+    const totalMin = state.workouts.reduce((s,w)=> s + (w.duration||0), 0);
+    document.getElementById('calBurnedToday').textContent = totalCal;
+    document.getElementById('activeMinToday').textContent = totalMin;
+
+    if(state.workouts.length === 0){
+      const empty = document.createElement('div');
+      empty.className = 'empty';
+      empty.textContent = 'No workouts logged yet — add your first entry above.';
+      list.appendChild(empty);
+      return;
+    }
+    state.workouts.slice().reverse().forEach(w=>{
+      const row = document.createElement('div');
+      row.className = 'entry';
+      row.innerHTML =
+        '<span class="entry-time">' + w.time + '</span>' +
+        '<span class="entry-name">' + w.name + '</span>' +
+        '<span class="entry-dur">' + w.duration + ' min</span>' +
+        '<span class="entry-cal">' + (w.calories ? w.calories + ' cal' : '—') + '</span>' +
+        '<button class="del" aria-label="Delete entry" data-id="' + w.id + '">✕</button>';
+      list.appendChild(row);
+    });
+    list.querySelectorAll('.del').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const id = btn.getAttribute('data-id');
+        state.workouts = state.workouts.filter(w=> String(w.id) !== id);
+        renderWorkouts();
+      });
+    });
+  }
+  renderWorkouts();
+
+  document.getElementById('workoutForm').addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const name = document.getElementById('woName').value.trim();
+    const duration = parseInt(document.getElementById('woDuration').value, 10);
+    const calories = parseInt(document.getElementById('woCalories').value, 10) || null;
+    if(!name || !duration) return;
+    state.workouts.push({
+      id: Date.now(),
+      name, duration, calories,
+      time: new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'})
+    });
+    document.getElementById('woName').value = '';
+    document.getElementById('woDuration').value = '';
+    document.getElementById('woCalories').value = '';
+    renderWorkouts();
+  });
+})();
+</script>
+</body>
+</html>
